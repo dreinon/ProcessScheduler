@@ -19,7 +19,7 @@ import time
 from typing import Optional
 import warnings
 
-from z3 import (Solver, Sum, unsat,
+from z3 import (Solver, Sum, unsat, Then, With,
                 ArithRef, unknown, Optimize, set_option)
 
 from processscheduler.objective import MaximizeObjective, MinimizeObjective
@@ -53,12 +53,18 @@ class SchedulingSolver:
         # create the solver
         if self.problem_context.objectives:
             self._solver = Optimize()  # Solver with optimization
+            #self._solver = Then(With('simplify', elim_ite=True, elim_and=True),
+            #                     'normalize-bounds',
+            #                    'solve-eqs', 'optsmt').solver()
             if verbosity:
                 print("Solver with optimization enabled")
         else:
             # see this url for a documentation about logics
             # http://smtlib.cs.uiowa.edu/logics.shtml
-            self._solver = Solver()
+            self._solver = Then('simplify',
+                                'normalize-bounds',
+                                'solve-eqs', 'smt').solver()
+            #self._solver = Solver()
             if verbosity:
                 print("Solver without optimization enabled")
 
